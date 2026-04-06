@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Mystery Box</title>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  /* --- Telas --- */
+  .screen { display: none; padding: 40px; }
+  .screen.active { display: block; }
+
+  /* --- Seções internas da bakery: ocultas por padrão --- */
+  .section { display: none; margin-top: 30px; }
+
+  /* --- Mystery Box --- */
+  #home {
+    background: black;
+    color: white;
+    min-height: 100vh;
+    font-family: monospace;
+  }
+
+  a { cursor: pointer; color: inherit; text-decoration: underline; }
+
+  /* --- Doceria --- */
+  #bakery {
+    background: #ffe4ec;
+    min-height: 100vh;
+    text-align: center;
+  }
+
+  .menu { margin-top: 20px; }
+
+  /* --- Botões --- */
+  button {
+    padding: 10px;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+
+  /* --- Comentários rejeitados --- */
+  #trash {
+    margin-top: 15px;
+    color: darkred;
+  }
+
+  /* --- Mensagem de erro inline --- */
+  .erro {
+    color: red;
+    margin-top: 8px;
+    font-size: 0.9em;
+  }
+
+  /* --- Final --- */
+  #final {
+    background: black;
+    color: red;
+    min-height: 100vh;
+    text-align: center;
+  }
+
+  /* --- Classe utilitária para ocultar elementos --- */
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- 🕵️‍♀️ MYSTERY BOX -->
+<div id="home" class="screen active">
+  <h1>Mystery Box</h1>
+  <p>&gt; Arquivos Recuperados</p>
+  <p><a onclick="openCase()">Case 01 — Sweet Delights</a></p>
+  <p style="opacity:0.3;">Case 02 — corrompido</p>
+</div>
+
+<!-- 🍰 DOCERIA -->
+<div id="bakery" class="screen">
+  <h1>🍰 Sweet Delights</h1>
+  <p>Bem-vindo!</p>
+
+  <div class="menu">
+    <a onclick="showSection('menu')">Menu</a> |
+    <a onclick="showSection('ingredientes')">Ingredientes</a> |
+    <a onclick="showSection('clientes')">Clientes</a> |
+    <a onclick="showSection('noticias')">Notícias</a> |
+    <a onclick="showSection('comentarios')">Comentários</a> |
+    <a onclick="showEmail()">Email</a>
+  </div>
+
+  <!-- 🍩 MENU -->
+  <div id="menu" class="section">
+    <h2>Menu</h2>
+    <p>Donut de chocolate</p>
+    <p>Donut de pasta de amendoim 🥜</p>
+    <p>Cupcake — 120g</p>
+    <p>Pedido recente: #1209</p>
+  </div>
+
+  <!-- 🧾 INGREDIENTES -->
+  <div id="ingredientes" class="section">
+    <h2>Ingredientes</h2>
+    <p>Leite, trigo, ovos</p>
+    <p><b>Atenção:</b> pode conter amendoim</p>
+  </div>
+
+  <!-- 💬 CLIENTES -->
+  <div id="clientes" class="section">
+    <h2>Clientes</h2>
+    <p>"Comprei um doce pro meu vizinho 😊"</p>
+    <p>"Nunca posso comer nada com amendoim..."</p>
+    <p>"Passei mal depois de comer aqui"</p>
+  </div>
+
+  <!-- 📰 NOTÍCIAS -->
+  <div id="noticias" class="section">
+    <h2>Notícias</h2>
+    <p>Padarias fecham por risco sanitário</p>
+    <p>Morador hospitalizado após reação alérgica</p>
+  </div>
+
+  <!-- 💬 COMENTÁRIOS -->
+  <div id="comentarios" class="section">
+    <h2>Comentários</h2>
+    <p>"Ótimo atendimento!"</p>
+    <p>"Vocês deveriam avisar melhor sobre alergias..."</p>
+    <button onclick="toggleTrash()">Ver comentários rejeitados</button>
+    <div id="trash" class="hidden">
+      <p>"Você sabia muito bem o que ia acontecer."</p>
+      <p>"Ela mereceu."</p>
+    </div>
+  </div>
+</div>
+
+<!-- 📧 EMAIL LOGIN -->
+<div id="email" class="screen">
+  <h2>Acesso ao Email</h2>
+  <input id="senha" type="password" placeholder="Senha">
+  <br>
+  <button onclick="checkPassword()">Entrar</button>
+  <p id="erro-senha" class="erro hidden">Senha incorreta. Procure pistas na loja.</p>
+</div>
+
+<!-- 📩 EMAIL CONTEÚDO -->
+<div id="emails" class="screen">
+  <h2>Emails</h2>
+  <p>Pedido #1209 confirmado:</p>
+  <p>Donut de pasta de amendoim</p>
+  <button onclick="goConclusion()">Continuar</button>
+</div>
+
+<!-- 🧩 CONCLUSÃO -->
+<div id="conclusao" class="screen">
+  <h2>Conclusão</h2>
+  <p>Quem é a vítima? <em>(dica: leia os comentários dos clientes)</em></p>
+  <input id="vitima" placeholder="Ex: vizinho">
+
+  <p>Quem é o responsável? <em>(dica: quem fez o pedido?)</em></p>
+  <input id="culpado" placeholder="Ex: cliente">
+
+  <br><br>
+  <button onclick="checkFinal()">Confirmar</button>
+  <p id="erro-final" class="erro hidden">Algo não está certo. Revise as pistas.</p>
+</div>
+
+<!-- 😈 FINAL -->
+<div id="final" class="screen">
+  <h1>Você descobriu...</h1>
+  <p>Nem todo veneno tem gosto amargo.</p>
+</div>
+
+<script>
+  // --- Configuração central (evita valores mágicos espalhados pelo código) ---
+  const CONFIG = {
+    emailPassword: "1209",
+    respostas: {
+      vitima: ["vizinho"],
+      culpado: ["cliente"]
+    }
+  };
+
+  // --- Navegação entre telas ---
+  function switchScreen(id) {
+    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function openCase() {
+    switchScreen('bakery');
+  }
+
+  function showEmail() {
+    switchScreen('email');
+  }
+
+  function goConclusion() {
+    switchScreen('conclusao');
+  }
+
+  // --- Seções internas da bakery ---
+  function showSection(id) {
+    document.querySelectorAll('.section').forEach(el => el.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+  }
+
+  // --- Comentários rejeitados: toggle com classe .hidden para consistência ---
+  function toggleTrash() {
+    const trash = document.getElementById('trash');
+    trash.classList.toggle('hidden');
+  }
+
+  // --- Verificação de senha com feedback inline ---
+  function checkPassword() {
+    const senha = document.getElementById('senha').value;
+    const erro = document.getElementById('erro-senha');
+
+    if (senha === CONFIG.emailPassword) {
+      erro.classList.add('hidden');
+      switchScreen('emails');
+    } else {
+      erro.classList.remove('hidden');
+    }
+  }
+
+  // --- Verificação da conclusão com feedback inline ---
+  function checkFinal() {
+    const vitima = document.getElementById('vitima').value.toLowerCase().trim();
+    const culpado = document.getElementById('culpado').value.toLowerCase().trim();
+    const erro = document.getElementById('erro-final');
+
+    const vitimaOk = CONFIG.respostas.vitima.some(r => vitima.includes(r));
+    const culpadoOk = CONFIG.respostas.culpado.some(r => culpado.includes(r));
+
+    if (vitimaOk && culpadoOk) {
+      erro.classList.add('hidden');
+      switchScreen('final');
+    } else {
+      erro.classList.remove('hidden');
+    }
+  }
+</script>
+</body>
+</html>
